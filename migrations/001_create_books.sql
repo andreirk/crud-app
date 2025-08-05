@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS books;
+
+CREATE TABLE books (
+    id SERIAL NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    is_free BOOLEAN NOT NULL,
+    genres TEXT[] NOT NULL,
+    published_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
