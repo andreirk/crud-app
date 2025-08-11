@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"database/sql"
@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jackietana/crud-app/internal/models"
-	"github.com/jackietana/crud-app/internal/repository"
+	"github.com/jackietana/crud-app/internal/domain"
+	"github.com/jackietana/crud-app/internal/repository/psql"
 )
 
 func HandleBooks(db *sql.DB) http.HandlerFunc {
@@ -44,7 +44,7 @@ func HandleBook(db *sql.DB) http.HandlerFunc {
 
 func getBooks(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		books, err := repository.GetBooks(db)
+		books, err := psql.GetBooks(db)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -72,7 +72,7 @@ func getBookById(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		book, err := repository.GetBookById(db, id)
+		book, err := psql.GetBookById(db, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -100,7 +100,7 @@ func createBook(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		var book models.BookCreate
+		var book domain.BookCreate
 		if err = json.Unmarshal(reqBytes, &book); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -111,7 +111,7 @@ func createBook(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = repository.CreateBook(db, book)
+		err = psql.CreateBook(db, book)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -132,7 +132,7 @@ func deleteBook(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = repository.DeleteBook(db, id)
+		err = psql.DeleteBook(db, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -159,7 +159,7 @@ func updateBook(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		var book models.BookCreate
+		var book domain.BookCreate
 		if err = json.Unmarshal(reqBytes, &book); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -170,7 +170,7 @@ func updateBook(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = repository.UpdateBook(db, id, book)
+		err = psql.UpdateBook(db, id, book)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -192,7 +192,7 @@ func getId(r *http.Request) (int, error) {
 	return strconv.Atoi(parts[2])
 }
 
-func validateData(b models.BookCreate) error {
+func validateData(b domain.BookCreate) error {
 	if b.Name == "" || b.Description == "" || b.Author == "" || b.IsFree == nil || len(b.Genres) == 0 {
 		return errors.New("all fields must be filled")
 	}

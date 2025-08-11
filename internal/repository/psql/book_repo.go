@@ -1,25 +1,25 @@
-package repository
+package psql
 
 import (
 	"database/sql"
 	"errors"
 	"log"
 
-	"github.com/jackietana/crud-app/internal/models"
+	"github.com/jackietana/crud-app/internal/domain"
 	"github.com/lib/pq"
 )
 
-func GetBooks(db *sql.DB) ([]models.Book, error) {
+func GetBooks(db *sql.DB) ([]domain.Book, error) {
 	rows, err := db.Query("SELECT * FROM books")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	books := make([]models.Book, 0)
+	books := make([]domain.Book, 0)
 
 	for rows.Next() {
-		b := models.Book{}
+		b := domain.Book{}
 		if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres), &b.PublishedAt); err != nil {
 			return nil, err
 		}
@@ -36,8 +36,8 @@ func GetBooks(db *sql.DB) ([]models.Book, error) {
 	return books, nil
 }
 
-func GetBookById(db *sql.DB, id int) (models.Book, error) {
-	var b models.Book
+func GetBookById(db *sql.DB, id int) (domain.Book, error) {
+	var b domain.Book
 	err := db.QueryRow("SELECT * FROM books WHERE id=$1", id).
 		Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres), &b.PublishedAt)
 	if err != nil {
@@ -53,7 +53,7 @@ func GetBookById(db *sql.DB, id int) (models.Book, error) {
 	return b, err
 }
 
-func CreateBook(db *sql.DB, b models.BookCreate) error {
+func CreateBook(db *sql.DB, b domain.BookCreate) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
@@ -78,7 +78,7 @@ func DeleteBook(db *sql.DB, id int) error {
 	return err
 }
 
-func UpdateBook(db *sql.DB, id int, b models.BookCreate) error {
+func UpdateBook(db *sql.DB, id int, b domain.BookCreate) error {
 	exists, err := bookExistsByID(db, id)
 	if err != nil {
 		return err

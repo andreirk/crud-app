@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jackietana/crud-app/internal/database"
-	"github.com/jackietana/crud-app/internal/handlers"
+	"github.com/jackietana/crud-app/internal/transport/rest"
+	"github.com/jackietana/crud-app/pkg/database"
 )
 
 func main() {
@@ -13,8 +13,8 @@ func main() {
 	defer db.Close()
 
 	//init handlers
-	http.HandleFunc("/books", handlers.HandleBooks(db))
-	http.HandleFunc("/books/", handlers.HandleBook(db))
+	http.HandleFunc("/books", rest.HandleBooks(db))
+	http.HandleFunc("/books/", rest.HandleBook(db))
 
 	//init server
 	log.Println("Server started on :8080")
