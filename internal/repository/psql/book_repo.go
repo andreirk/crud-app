@@ -10,15 +10,15 @@ import (
 	"github.com/lib/pq"
 )
 
-type BooksRepository struct {
+type BookRepository struct {
 	db *sql.DB
 }
 
-func NewBooksRepo(db *sql.DB) *BooksRepository {
-	return &BooksRepository{db}
+func NewBookRepo(db *sql.DB) *BookRepository {
+	return &BookRepository{db}
 }
 
-func (br *BooksRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
+func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
 	rows, err := br.db.Query("SELECT * FROM books")
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (br *BooksRepository) GetBooks(ctx context.Context) ([]domain.Book, error) 
 	return books, nil
 }
 
-func (br *BooksRepository) GetBookById(ctx context.Context, id int) (domain.Book, error) {
+func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book, error) {
 	var b domain.Book
 	err := br.db.QueryRow("SELECT * FROM books WHERE id=$1", id).
 		Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres), &b.PublishedAt)
@@ -62,7 +62,7 @@ func (br *BooksRepository) GetBookById(ctx context.Context, id int) (domain.Book
 	return b, err
 }
 
-func (br *BooksRepository) CreateBook(ctx context.Context, b domain.BookCreate) error {
+func (br *BookRepository) CreateBook(ctx context.Context, b domain.BookCreate) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
@@ -72,7 +72,7 @@ func (br *BooksRepository) CreateBook(ctx context.Context, b domain.BookCreate) 
 	return err
 }
 
-func (br *BooksRepository) DeleteBook(ctx context.Context, id int) error {
+func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
 	exists, err := br.bookExistsByID(id)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (br *BooksRepository) DeleteBook(ctx context.Context, id int) error {
 	return err
 }
 
-func (br *BooksRepository) UpdateBook(ctx context.Context, id int, b domain.BookCreate) error {
+func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.BookCreate) error {
 	exists, err := br.bookExistsByID(id)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (br *BooksRepository) UpdateBook(ctx context.Context, id int, b domain.Book
 	return err
 }
 
-func (br *BooksRepository) bookExistsByID(id int) (bool, error) {
+func (br *BookRepository) bookExistsByID(id int) (bool, error) {
 	var exists bool
 	err := br.db.QueryRow("SELECT EXISTS(SELECT 1 FROM books WHERE id=$1)", id).Scan(&exists)
 	if err != nil {
