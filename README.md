@@ -45,12 +45,18 @@ func main() {
 	db := database.ConnectDB()
 	defer db.Close()
 
-	//init handlers
-	http.HandleFunc("/books", handlers.HandleBooks(db))
-	http.HandleFunc("/books/", handlers.HandleBook(db))
+	//init dependencies
+	bookRepo := psql.NewBookRepo(db)
+	bookService := service.NewBookService(bookRepo)
+	bookHandler := rest.NewBookHandler(bookService)
 
-	//init server
+	//init and run server
+	srv := &http.Server{
+		Addr:    "8080",
+		Handler: bookHandler.InitRouter(),
+	}
+
 	log.Println("Server started on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(srv.ListenAndServe())
 }
 ```

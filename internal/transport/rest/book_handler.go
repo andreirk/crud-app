@@ -16,7 +16,7 @@ import (
 
 type BookService interface {
 	GetBooks(ctx context.Context) ([]domain.Book, error)
-	getBookById(ctx context.Context, id int) (domain.Book, error)
+	GetBookById(ctx context.Context, id int) (domain.Book, error)
 	CreateBook(ctx context.Context, book domain.BookCreate) error
 	DeleteBook(ctx context.Context, id int) error
 	UpdateBook(ctx context.Context, id int, book domain.BookCreate) error
@@ -72,7 +72,7 @@ func (bh *BookHandler) getBookById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book, err := bh.bookService.getBookById(context.TODO(), id)
+	book, err := bh.bookService.GetBookById(context.TODO(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
