@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/jackietana/crud-app/internal/domain"
 )
 
@@ -27,6 +28,21 @@ type BookHandler struct {
 
 func NewBookHandler(bookService BookService) *BookHandler {
 	return &BookHandler{bookService}
+}
+
+func (bh *BookHandler) InitRouter() *mux.Router {
+	r := mux.NewRouter()
+
+	books := r.PathPrefix("/books").Subrouter()
+	{
+		books.HandleFunc("", bh.getBooks).Methods(http.MethodGet)
+		books.HandleFunc("/{id:[0-9]+}", bh.getBookById).Methods(http.MethodGet)
+		books.HandleFunc("", bh.createBook).Methods(http.MethodPost)
+		books.HandleFunc("/{id:[0-9]+}", bh.deleteBook).Methods(http.MethodDelete)
+		books.HandleFunc("/{id:[0-9]+}", bh.updateBook).Methods(http.MethodPut)
+	}
+
+	return r
 }
 
 func (bh *BookHandler) getBooks(w http.ResponseWriter, r *http.Request) {
