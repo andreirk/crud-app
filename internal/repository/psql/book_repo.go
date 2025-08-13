@@ -29,7 +29,8 @@ func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
 
 	for rows.Next() {
 		b := domain.Book{}
-		if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres), &b.PublishedAt); err != nil {
+		if err := rows.Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres),
+			&b.PublishedAt); err != nil {
 			return nil, err
 		}
 
