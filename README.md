@@ -21,22 +21,28 @@ Endpoints: /books (GET and POST) and /books/id (GET, PUT and DELETE).
 
 ### Quick Start:
 1. Install Go language
-2. Install PostgreSQL and create a database
-3. To create database run these commands in the terminal:
+2. Copy project and cd into root project folder:
+```bash
+cd path/to/your/folder
+git clone https://github.com/jackietana/crud-app.git
+cd crud-app
+```
+3. Install PostgreSQL and create a database
+4. To create database run these commands in the terminal:
 ```bash
 psql -U postgres
 CREATE DATABASE db_name;
 ```
-4. To quickly configure your DB, run this command in the terminal while in the root folder of the project:
+5. To quickly configure your DB, run this command in the terminal while in the root folder of the project:
 ```bash
 psql -U postgres -d db_name -f migrations/001_create_users.sql
 ```
-5. To install all dependencies run these commands:
+6. To install all dependencies run these commands:
 ```bash
 go mod init your-app-name
 go get github.com/lib/pq
 ```
-6. To run the application run this command:
+7. To run the application run this command:
 ```bash
 go run cmd/main.go
 ```
