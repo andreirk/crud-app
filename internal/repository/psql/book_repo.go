@@ -62,12 +62,12 @@ func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book,
 	return b, err
 }
 
-func (br *BookRepository) CreateBook(ctx context.Context, b domain.BookCreate) error {
+func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
 	log.Printf("INSERT INTO books (name, description, author, is_free, genres) VALUES (%s, %s, %s, %t, %s)",
-		b.Name, b.Description, b.Author, *b.IsFree, b.Genres)
+		b.Name, b.Description, b.Author, b.IsFree, b.Genres)
 
 	return err
 }
@@ -87,7 +87,7 @@ func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
 	return err
 }
 
-func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.BookCreate) error {
+func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book) error {
 	exists, err := br.bookExistsByID(id)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.BookC
 	_, err = br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres), id)
 
 	log.Printf("REPO: UPDATE books SET name=%s, description=%s, author=%s, is_free=%t, genres=%s WHERE id=%d",
-		b.Name, b.Description, b.Author, *b.IsFree, b.Genres, id)
+		b.Name, b.Description, b.Author, b.IsFree, b.Genres, id)
 
 	return err
 }

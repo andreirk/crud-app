@@ -51,12 +51,7 @@ func main() {
 	bookHandler := rest.NewBookHandler(bookService)
 
 	//init and run server
-	srv := &http.Server{
-		Addr:    "8080",
-		Handler: bookHandler.InitRouter(),
-	}
-
-	log.Println("Server started on :8080")
-	log.Fatal(srv.ListenAndServe())
+	r := bookHandler.InitRouter()
+	log.Fatal(r.Run(":8080"))
 }
 ```

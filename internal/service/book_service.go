@@ -9,9 +9,9 @@ import (
 type BookRepository interface {
 	GetBookById(ctx context.Context, id int) (domain.Book, error)
 	GetBooks(ctx context.Context) ([]domain.Book, error)
-	CreateBook(ctx context.Context, book domain.BookCreate) error
+	CreateBook(ctx context.Context, book domain.Book) error
 	DeleteBook(ctx context.Context, id int) error
-	UpdateBook(ctx context.Context, id int, book domain.BookCreate) error
+	UpdateBook(ctx context.Context, id int, book domain.Book) error
 }
 
 type BookService struct {
@@ -30,7 +30,7 @@ func (bs *BookService) GetBookById(ctx context.Context, id int) (domain.Book, er
 	return bs.repo.GetBookById(ctx, id)
 }
 
-func (bs *BookService) CreateBook(ctx context.Context, book domain.BookCreate) error {
+func (bs *BookService) CreateBook(ctx context.Context, book domain.Book) error {
 	return bs.repo.CreateBook(ctx, book)
 }
 
@@ -38,6 +38,6 @@ func (bs *BookService) DeleteBook(ctx context.Context, id int) error {
 	return bs.repo.DeleteBook(ctx, id)
 }
 
-func (bs *BookService) UpdateBook(ctx context.Context, id int, book domain.BookCreate) error {
+func (bs *BookService) UpdateBook(ctx context.Context, id int, book domain.Book) error {
 	return bs.repo.UpdateBook(ctx, id, book)
 }
