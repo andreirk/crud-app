@@ -12,6 +12,11 @@ import (
 
 const ttlDuration = time.Hour * 8
 
+var (
+	allBooksCached bool
+	cachedBookIDs  = make(map[string]string, 0)
+)
+
 type BookRepository interface {
 	GetBookById(ctx context.Context, id int) (domain.Book, error)
 	GetBooks(ctx context.Context) ([]domain.Book, error)
@@ -30,21 +35,51 @@ func NewBookService(repo BookRepository) *BookService {
 }
 
 func (bs *BookService) GetBooks(ctx context.Context) ([]domain.Book, error) {
-	return bs.repo.GetBooks(ctx)
+	var books = make([]domain.Book, 0)
+
+	if allBooksCached {
+		for _, id := range cachedBookIDs {
+			if id != "" {
+				item, _ := bs.cache.Get(id)
+				books = append(books, item.(domain.Book))
+			}
+		}
+
+		log.Println("SERVICE: all cached books retrieved")
+		return books, nil
+	}
+
+	books, err := bs.repo.GetBooks(ctx)
+
+	for _, book := range books {
+		bookID := fmt.Sprintf("book_%d", book.ID)
+
+		if item, _ := bs.cache.Get(bookID); item == nil {
+			bs.cache.Set(bookID, book, ttlDuration)
+			cachedBookIDs[bookID] = bookID
+			log.Printf("SERVICE: %s added to cache", bookID)
+		}
+	}
+
+	allBooksCached = true
+
+	return books, err
 }
 
 func (bs *BookService) GetBookById(ctx context.Context, id int) (domain.Book, error) {
-	// in cache? (Y -> return) -> check db -> add in cache
-	if val, err := bs.cache.Get(fmt.Sprintf("book_%d", id)); err == nil {
+	bookID := fmt.Sprintf("book_%d", id)
+
+	if val, err := bs.cache.Get(bookID); err == nil {
 		if book, ok := val.(domain.Book); ok {
-			log.Printf("SERVICE: book_%d retrieved from cache", id)
+			log.Printf("SERVICE: %s retrieved from cache", bookID)
 			return book, nil
 		}
 	}
 
 	book, err := bs.repo.GetBookById(ctx, id)
 	if err == nil {
-		bs.cache.Set(fmt.Sprintf("book_%d", id), book, ttlDuration)
+		bs.cache.Set(bookID, book, ttlDuration)
+		cachedBookIDs[bookID] = bookID
 		log.Printf("SERVICE: book_%d added to cache", id)
 	}
 
@@ -52,13 +87,30 @@ func (bs *BookService) GetBookById(ctx context.Context, id int) (domain.Book, er
 }
 
 func (bs *BookService) CreateBook(ctx context.Context, book domain.Book) error {
+	allBooksCached = false
 	return bs.repo.CreateBook(ctx, book)
 }
 
 func (bs *BookService) DeleteBook(ctx context.Context, id int) error {
+	bookId := fmt.Sprintf("book_%d", id)
+
+	if _, err := bs.cache.Get(bookId); err == nil {
+		bs.cache.Delete(bookId)
+		delete(cachedBookIDs, bookId)
+		log.Printf("SERVICE: %s removed from cache", bookId)
+	}
+
 	return bs.repo.DeleteBook(ctx, id)
 }
 
 func (bs *BookService) UpdateBook(ctx context.Context, id int, book domain.Book) error {
+	bookId := fmt.Sprintf("book_%d", id)
+
+	if _, err := bs.cache.Get(bookId); err == nil {
+		bs.cache.Delete(bookId)
+		allBooksCached = false
+		log.Printf("SERVICE: %s removed from cache", bookId)
+	}
+
 	return bs.repo.UpdateBook(ctx, id, book)
 }
