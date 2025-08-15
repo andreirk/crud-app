@@ -90,9 +90,18 @@ func (ch *CacheHandler) DeleteCachedBook(id int) {
 	}
 }
 
-func (ch *CacheHandler) UpdateCachedBook(id int) {
-	ch.DeleteCachedBook(id)
-	allBooksCached = false
+func (ch *CacheHandler) UpdateCachedBook(id int, book domain.Book) {
+	bookId := fmt.Sprintf("book_%d", id)
+
+	if val, err := ch.cache.Get(bookId); err == nil {
+		if cachedBook, ok := val.(domain.Book); ok {
+			book.ID = cachedBook.ID
+			book.PublishedAt = cachedBook.PublishedAt
+
+			ch.cache.Set(bookId, book, ttlDuration)
+			log.Printf("CACHER: %s updated in cache", bookId)
+		}
+	}
 }
 
 func (ch *CacheHandler) UpdateCacher() {

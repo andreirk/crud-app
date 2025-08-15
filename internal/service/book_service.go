@@ -63,7 +63,7 @@ func (bs *BookService) DeleteBook(ctx context.Context, id int) error {
 }
 
 func (bs *BookService) UpdateBook(ctx context.Context, id int, book domain.Book) error {
-	bs.cacher.UpdateCachedBook(id)
+	bs.cacher.UpdateCachedBook(id, book)
 
 	return bs.repo.UpdateBook(ctx, id, book)
 }
