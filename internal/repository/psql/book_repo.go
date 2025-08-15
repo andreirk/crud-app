@@ -67,7 +67,7 @@ func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
-	log.Printf("INSERT INTO books (name, description, author, is_free, genres) VALUES (%s, %s, %s, %t, %s)",
+	log.Printf("REPO: INSERT INTO books (name, description, author, is_free, genres) VALUES (%s, %s, %s, %t, %s)",
 		b.Name, b.Description, b.Author, b.IsFree, b.Genres)
 
 	return err
