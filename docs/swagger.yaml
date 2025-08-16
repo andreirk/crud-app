@@ -1,0 +1,133 @@
+basePath: /
+definitions:
+  domain.Book:
+    properties:
+      author:
+        type: string
+      description:
+        type: string
+      genres:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      is_free:
+        type: boolean
+      name:
+        type: string
+      published_at:
+        type: string
+    required:
+    - author
+    - description
+    - genres
+    - is_free
+    - name
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: CRUD-application providing Web API to data in PostgreSQL.
+  title: CRUD-app
+  version: "1.0"
+paths:
+  /books:
+    get:
+      description: get all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Book'
+            type: array
+      summary: List books
+      tags:
+      - books
+    post:
+      consumes:
+      - application/json
+      description: create new book
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Book successfully created
+          schema:
+            type: string
+      summary: Create book
+      tags:
+      - books
+  /books/{id}:
+    delete:
+      description: delete book by id
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Book successfully removed
+          schema:
+            type: string
+        "404":
+          description: book not found
+          schema:
+            type: string
+      summary: Delete book
+      tags:
+      - books
+    get:
+      description: get book by id
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Book'
+        "404":
+          description: book not found
+          schema:
+            type: string
+      summary: Get specific book
+      tags:
+      - books
+    put:
+      consumes:
+      - application/json
+      description: update existing book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Book successfully updated
+          schema:
+            type: string
+        "404":
+          description: book not found
+          schema:
+            type: string
+      summary: Update book
+      tags:
+      - books
+swagger: "2.0"

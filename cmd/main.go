@@ -9,6 +9,12 @@ import (
 	"github.com/jackietana/crud-app/pkg/database"
 )
 
+// @title CRUD-app
+// @version 1.0
+// @description CRUD-application providing Web API to data in PostgreSQL.
+
+// @host localhost:8080
+// @BasePath /
 func main() {
 	db := database.ConnectDB()
 	defer db.Close()

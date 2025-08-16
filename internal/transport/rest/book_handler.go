@@ -8,6 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackietana/crud-app/internal/domain"
+
+	_ "github.com/jackietana/crud-app/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type BookService interface {
@@ -38,9 +42,17 @@ func (bh *BookHandler) InitRouter() *gin.Engine {
 		books.PUT("/:id", bh.updateBook)
 	}
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	return r
 }
 
+// @Summary List books
+// @Description get all books
+// @Tags books
+// @Produce json
+// @Success 200 {object} []domain.Book
+// @Router /books [get]
 func (bh *BookHandler) getBooks(c *gin.Context) {
 	books, err := bh.bookService.GetBooks(context.TODO())
 	if err != nil {
@@ -53,6 +65,14 @@ func (bh *BookHandler) getBooks(c *gin.Context) {
 	log.Println("HANDLER: GET method in /books")
 }
 
+// @Summary Get specific book
+// @Description get book by id
+// @Tags books
+// @Produce json
+// @Param id path int true "Book ID"
+// @Success 200 {object} domain.Book
+// @Failure 404 {string} string "book not found"
+// @Router /books/{id} [get]
 func (bh *BookHandler) getBookById(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
@@ -70,6 +90,13 @@ func (bh *BookHandler) getBookById(c *gin.Context) {
 	log.Printf("HANDLER: GET method in /books/%d", id)
 }
 
+// @Summary Create book
+// @Description create new book
+// @Tags books
+// @Accept json
+// @Produce json
+// @Success 201 {string} string "Book successfully created"
+// @Router /books [post]
 func (bh *BookHandler) createBook(c *gin.Context) {
 	var book domain.Book
 	if err := c.BindJSON(&book); err != nil {
@@ -87,6 +114,14 @@ func (bh *BookHandler) createBook(c *gin.Context) {
 	log.Println("HANDLER: POST method in /books")
 }
 
+// @Summary Delete book
+// @Description delete book by id
+// @Tags books
+// @Produce plain
+// @Param id path int true "Book ID"
+// @Success 200 {string} string "Book successfully removed"
+// @Failure 404 {string} string "book not found"
+// @Router /books/{id} [delete]
 func (bh *BookHandler) deleteBook(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
@@ -104,6 +139,15 @@ func (bh *BookHandler) deleteBook(c *gin.Context) {
 	log.Printf("HANDLER: DELETE method in /books/%d", id)
 }
 
+// @Summary Update book
+// @Description update existing book
+// @Tags books
+// @Accept json
+// @Produce plain
+// @Param id path int true "Book ID"
+// @Success 200 {string} string "Book successfully updated"
+// @Failure 404 {string} string "book not found"
+// @Router /books/{id} [put]
 func (bh *BookHandler) updateBook(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
