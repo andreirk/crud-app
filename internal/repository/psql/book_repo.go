@@ -19,7 +19,7 @@ func NewBookRepo(db *sql.DB) *BookRepository {
 }
 
 func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
-	rows, err := br.db.Query("SELECT * FROM books")
+	rows, err := br.db.QueryContext(ctx, "SELECT * FROM books")
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
 
 func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book, error) {
 	var b domain.Book
-	err := br.db.QueryRow("SELECT * FROM books WHERE id=$1", id).
+	err := br.db.QueryRowContext(ctx, "SELECT * FROM books WHERE id=$1", id).
 		Scan(&b.ID, &b.Name, &b.Description, &b.Author, &b.IsFree, pq.Array(&b.Genres), &b.PublishedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -70,7 +70,7 @@ func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book,
 
 func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
-	_, err := br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
+	_, err := br.db.ExecContext(ctx, strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
 	log.WithFields(log.Fields{
 		"repo": "CreateBook",
@@ -80,14 +80,14 @@ func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 }
 
 func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
-	exists, err := br.bookExistsByID(id)
+	exists, err := br.bookExistsByID(ctx, id)
 	if err != nil {
 		return err
 	} else if !exists {
 		return errors.New("book not found")
 	}
 
-	_, err = br.db.Exec("DELETE FROM books WHERE id=$1", id)
+	_, err = br.db.ExecContext(ctx, "DELETE FROM books WHERE id=$1", id)
 
 	log.WithFields(log.Fields{
 		"repo": "DeleteBook",
@@ -98,7 +98,7 @@ func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
 }
 
 func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book) error {
-	exists, err := br.bookExistsByID(id)
+	exists, err := br.bookExistsByID(ctx, id)
 	if err != nil {
 		return err
 	} else if !exists {
@@ -106,7 +106,7 @@ func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book)
 	}
 
 	strExec := "UPDATE books SET name=$1, description=$2, author=$3, is_free=$4, genres=$5 WHERE id=$6"
-	_, err = br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres), id)
+	_, err = br.db.ExecContext(ctx, strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres), id)
 
 	log.WithFields(log.Fields{
 		"repo": "UpdateBook",
@@ -116,9 +116,9 @@ func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book)
 	return err
 }
 
-func (br *BookRepository) bookExistsByID(id int) (bool, error) {
+func (br *BookRepository) bookExistsByID(ctx context.Context, id int) (bool, error) {
 	var exists bool
-	err := br.db.QueryRow("SELECT EXISTS(SELECT 1 FROM books WHERE id=$1)", id).Scan(&exists)
+	err := br.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM books WHERE id=$1)", id).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
