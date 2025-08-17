@@ -2,22 +2,25 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
+	"github.com/jackietana/crud-app/internal/config"
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB() *sql.DB {
-	connStr := "host=127.0.0.1 port=5432 user=postgres password=goLANGn1nja dbname=postgres sslmode=disable"
+func ConnectDB(p *config.Postgres) (*sql.DB, error) {
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		p.Host, p.Port, p.User, p.Pass, p.Name)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if err = db.Ping(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	log.Println("Successfull connection to PostgreSQL")
 
-	return db
+	return db, nil
 }

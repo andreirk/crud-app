@@ -1,12 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/jackietana/crud-app/internal/config"
 	"github.com/jackietana/crud-app/internal/repository/psql"
 	"github.com/jackietana/crud-app/internal/service"
 	"github.com/jackietana/crud-app/internal/transport/rest"
 	"github.com/jackietana/crud-app/pkg/database"
+)
+
+const (
+	CONF_DIR  = "configs"
+	CONF_FILE = "main"
 )
 
 // @title CRUD-app
@@ -15,8 +22,19 @@ import (
 
 // @host localhost:8080
 // @BasePath /
+
 func main() {
-	db := database.ConnectDB()
+	// init configuration
+	cfg, err := config.New(CONF_DIR, CONF_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// init db connection
+	db, err := database.ConnectDB(&cfg.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer db.Close()
 
 	//init dependencies
@@ -26,5 +44,5 @@ func main() {
 
 	//init and run server
 	r := bookHandler.InitRouter()
-	log.Fatal(r.Run(":8080"))
+	log.Fatal(r.Run(fmt.Sprintf(":%d", cfg.Server.Port)))
 }

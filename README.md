@@ -48,7 +48,17 @@ go run cmd/main.go
 ```
 ```go
 func main() {
-	db := database.ConnectDB()
+	// init configuration
+	cfg, err := config.New(CONF_DIR, CONF_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// init db connection
+	db, err := database.ConnectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer db.Close()
 
 	//init dependencies
@@ -58,6 +68,6 @@ func main() {
 
 	//init and run server
 	r := bookHandler.InitRouter()
-	log.Fatal(r.Run(":8080"))
+	log.Fatal(r.Run(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
 ```
