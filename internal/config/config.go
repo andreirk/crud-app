@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+
 	"github.com/spf13/viper"
 )
 
@@ -12,15 +14,22 @@ type Config struct {
 	} `mapstructure:"server"`
 }
 
-func (c *Config) mapPostgres() {
-	c.DB.Host = c.mapField("host")
-	c.DB.Port = c.mapField("port")
-	c.DB.User = c.mapField("user")
-	c.DB.Pass = c.mapField("pass")
-	c.DB.Name = c.mapField("name")
+func (c *Config) mapPostgres() error {
+	c.DB.Host = c.getField("host")
+	c.DB.Port = c.getField("port")
+	c.DB.User = c.getField("user")
+	c.DB.Pass = c.getField("pass")
+	c.DB.Name = c.getField("name")
+
+	if c.DB.Host == "" || c.DB.Port == "" ||
+		c.DB.User == "" || c.DB.Pass == "" || c.DB.Name == "" {
+		return errors.New("unable to retrieve all fields")
+	}
+
+	return nil
 }
 
-func (c *Config) mapField(field string) string {
+func (c *Config) getField(field string) string {
 	if val, ok := viper.Get(field).(string); ok {
 		return val
 	}
@@ -52,7 +61,9 @@ func New(dir, file string) (*Config, error) {
 		return nil, err
 	}
 
-	cfg.mapPostgres()
+	if err := cfg.mapPostgres(); err != nil {
+		return nil, err
+	}
 
 	return cfg, nil
 }
