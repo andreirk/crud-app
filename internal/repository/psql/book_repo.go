@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/jackietana/crud-app/internal/domain"
 	"github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 )
 
 type BookRepository struct {
@@ -41,7 +41,9 @@ func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
 		return nil, err
 	}
 
-	log.Println("REPO: SELECT * FROM books")
+	log.WithFields(log.Fields{
+		"repo": "GetBooks",
+	}).Info()
 
 	return books, nil
 }
@@ -58,7 +60,10 @@ func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book,
 		return b, err
 	}
 
-	log.Printf("REPO: SELECT * FROM books WHERE id=%d", id)
+	log.WithFields(log.Fields{
+		"repo": "GetBookById",
+		"id":   id,
+	}).Info()
 
 	return b, err
 }
@@ -67,8 +72,9 @@ func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
-	log.Printf("REPO: INSERT INTO books (name, description, author, is_free, genres) VALUES (%s, %s, %s, %t, %s)",
-		b.Name, b.Description, b.Author, b.IsFree, b.Genres)
+	log.WithFields(log.Fields{
+		"repo": "CreateBook",
+	}).Info()
 
 	return err
 }
@@ -83,7 +89,10 @@ func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
 
 	_, err = br.db.Exec("DELETE FROM books WHERE id=$1", id)
 
-	log.Printf("REPO: DELETE FROM books WHERE id=%d", id)
+	log.WithFields(log.Fields{
+		"repo": "DeleteBook",
+		"id":   id,
+	}).Info()
 
 	return err
 }
@@ -99,8 +108,10 @@ func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book)
 	strExec := "UPDATE books SET name=$1, description=$2, author=$3, is_free=$4, genres=$5 WHERE id=$6"
 	_, err = br.db.Exec(strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres), id)
 
-	log.Printf("REPO: UPDATE books SET name=%s, description=%s, author=%s, is_free=%t, genres=%s WHERE id=%d",
-		b.Name, b.Description, b.Author, b.IsFree, b.Genres, id)
+	log.WithFields(log.Fields{
+		"repo": "UpdateBook",
+		"id":   id,
+	}).Info()
 
 	return err
 }

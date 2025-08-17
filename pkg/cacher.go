@@ -3,11 +3,11 @@ package pkg
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jackietana/cache-example"
 	"github.com/jackietana/crud-app/internal/domain"
+	log "github.com/sirupsen/logrus"
 )
 
 const ttlDuration = time.Hour * 8
@@ -42,7 +42,7 @@ func (ch *CacheHandler) GetCachedBooks() ([]domain.Book, error) {
 			}
 		}
 
-		log.Println("CACHER: all cached books retrieved")
+		log.WithField("cacher", "GetCachedBooks").Info()
 		return books, nil
 	}
 
@@ -55,7 +55,10 @@ func (ch *CacheHandler) AddBook(book domain.Book) {
 	if item, _ := ch.cache.Get(bookID); item == nil {
 		ch.cache.Set(bookID, book, ttlDuration)
 		cachedBookIDs[bookID] = bookID
-		log.Printf("CACHER: %s added to cache", bookID)
+		log.WithFields(log.Fields{
+			"cacher": "AddBook",
+			"id":     bookID,
+		}).Info()
 	}
 }
 
@@ -72,7 +75,10 @@ func (ch CacheHandler) GetCachedBook(id int) (domain.Book, error) {
 
 	if val, err := ch.cache.Get(bookID); err == nil {
 		if book, ok := val.(domain.Book); ok {
-			log.Printf("CACHER: %s retrieved from cache", bookID)
+			log.WithFields(log.Fields{
+				"cacher": "GetCachedBook",
+				"id":     bookID,
+			}).Info()
 			return book, nil
 		}
 	}
@@ -86,7 +92,10 @@ func (ch *CacheHandler) DeleteCachedBook(id int) {
 	if _, err := ch.cache.Get(bookId); err == nil {
 		ch.cache.Delete(bookId)
 		delete(cachedBookIDs, bookId)
-		log.Printf("CACHER: %s removed from cache", bookId)
+		log.WithFields(log.Fields{
+			"cacher": "DeleteCachedBook",
+			"id":     bookId,
+		}).Info()
 	}
 }
 
@@ -99,7 +108,10 @@ func (ch *CacheHandler) UpdateCachedBook(id int, book domain.Book) {
 			book.PublishedAt = cachedBook.PublishedAt
 
 			ch.cache.Set(bookId, book, ttlDuration)
-			log.Printf("CACHER: %s updated in cache", bookId)
+			log.WithFields(log.Fields{
+				"cacher": "UpdateCachedBook",
+				"id":     bookId,
+			}).Info()
 		}
 	}
 }

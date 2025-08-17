@@ -2,12 +2,12 @@ package rest
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackietana/crud-app/internal/domain"
+	log "github.com/sirupsen/logrus"
 
 	_ "github.com/jackietana/crud-app/docs"
 	swaggerFiles "github.com/swaggo/files"
@@ -56,13 +56,17 @@ func (bh *BookHandler) InitRouter() *gin.Engine {
 func (bh *BookHandler) getBooks(c *gin.Context) {
 	books, err := bh.bookService.GetBooks(context.TODO())
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "getBooks",
+			"issue":   "service error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	c.JSON(http.StatusOK, books)
 
-	log.Println("HANDLER: GET method in /books")
+	log.WithField("handler", "getBooks").Info()
 }
 
 // @Summary Get specific book
@@ -76,18 +80,26 @@ func (bh *BookHandler) getBooks(c *gin.Context) {
 func (bh *BookHandler) getBookById(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "getBookById",
+			"issue":   "getId error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	book, err := bh.bookService.GetBookById(context.TODO(), id)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "getBookById",
+			"issue":   "service error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	c.JSON(http.StatusOK, book)
-	log.Printf("HANDLER: GET method in /books/%d", id)
+	log.WithField("handler", "getBookById").Info()
 }
 
 // @Summary Create book
@@ -100,18 +112,26 @@ func (bh *BookHandler) getBookById(c *gin.Context) {
 func (bh *BookHandler) createBook(c *gin.Context) {
 	var book domain.Book
 	if err := c.BindJSON(&book); err != nil {
+		log.WithFields(log.Fields{
+			"handler": "createBook",
+			"issue":   "bindJson error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err := bh.bookService.CreateBook(context.TODO(), book)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "createBook",
+			"issue":   "service error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	c.String(http.StatusCreated, "Book successfully created")
-	log.Println("HANDLER: POST method in /books")
+	log.WithField("handler", "createBook").Info()
 }
 
 // @Summary Delete book
@@ -125,18 +145,26 @@ func (bh *BookHandler) createBook(c *gin.Context) {
 func (bh *BookHandler) deleteBook(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "deleteBook",
+			"issue":   "getId error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = bh.bookService.DeleteBook(context.TODO(), id)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "deleteBook",
+			"issue":   "service error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	c.String(http.StatusOK, "Book successfully removed")
-	log.Printf("HANDLER: DELETE method in /books/%d", id)
+	log.WithField("handler", "deleteBook").Info()
 }
 
 // @Summary Update book
@@ -151,24 +179,36 @@ func (bh *BookHandler) deleteBook(c *gin.Context) {
 func (bh *BookHandler) updateBook(c *gin.Context) {
 	id, err := getId(c)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "updateBook",
+			"issue":   "getId error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var book domain.Book
 	if err := c.BindJSON(&book); err != nil {
+		log.WithFields(log.Fields{
+			"handler": "updateBook",
+			"issue":   "bindJson error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = bh.bookService.UpdateBook(context.TODO(), id, book)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "updateBook",
+			"issue":   "service error",
+		}).Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	c.String(http.StatusOK, "Book successfully updated")
-	log.Printf("HANDLER: PUT method in /books/%d", id)
+	log.WithField("handler", "updateBook").Info()
 }
 
 func getId(c *gin.Context) (int, error) {
