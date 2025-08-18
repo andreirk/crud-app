@@ -15,7 +15,7 @@ func loggerMiddleware() gin.HandlerFunc {
 		endTime := time.Since(startTime).String()
 		log.WithFields(log.Fields{
 			"method":   ctx.Request.Method,
-			"URI":      ctx.Request.RequestURI,
+			"URL":      ctx.Request.URL,
 			"duration": endTime,
 		}).Info("Middleware: loggerMiddleware")
 	}
