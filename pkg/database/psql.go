@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackietana/crud-app/internal/config"
 	_ "github.com/lib/pq"
-	log "github.com/sirupsen/logrus"
 )
 
 func ConnectDB(p *config.Postgres) (*sql.DB, error) {
@@ -20,7 +19,6 @@ func ConnectDB(p *config.Postgres) (*sql.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-	log.Info("Successfull connection to PostgreSQL")
 
 	return db, nil
 }

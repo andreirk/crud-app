@@ -41,9 +41,7 @@ func (br *BookRepository) GetBooks(ctx context.Context) ([]domain.Book, error) {
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"repo": "GetBooks",
-	}).Info()
+	log.Info("Repository: GetBooks")
 
 	return books, nil
 }
@@ -60,10 +58,7 @@ func (br *BookRepository) GetBookById(ctx context.Context, id int) (domain.Book,
 		return b, err
 	}
 
-	log.WithFields(log.Fields{
-		"repo": "GetBookById",
-		"id":   id,
-	}).Info()
+	log.WithField("id", id).Info("Repository: GetBookById")
 
 	return b, err
 }
@@ -72,9 +67,7 @@ func (br *BookRepository) CreateBook(ctx context.Context, b domain.Book) error {
 	strExec := "INSERT INTO books (name, description, author, is_free, genres) VALUES ($1, $2, $3, $4, $5)"
 	_, err := br.db.ExecContext(ctx, strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres))
 
-	log.WithFields(log.Fields{
-		"repo": "CreateBook",
-	}).Info()
+	log.Info("Repository: CreateBook")
 
 	return err
 }
@@ -89,10 +82,7 @@ func (br *BookRepository) DeleteBook(ctx context.Context, id int) error {
 
 	_, err = br.db.ExecContext(ctx, "DELETE FROM books WHERE id=$1", id)
 
-	log.WithFields(log.Fields{
-		"repo": "DeleteBook",
-		"id":   id,
-	}).Info()
+	log.WithField("id", id).Info("Repository: DeleteBook")
 
 	return err
 }
@@ -108,10 +98,7 @@ func (br *BookRepository) UpdateBook(ctx context.Context, id int, b domain.Book)
 	strExec := "UPDATE books SET name=$1, description=$2, author=$3, is_free=$4, genres=$5 WHERE id=$6"
 	_, err = br.db.ExecContext(ctx, strExec, b.Name, b.Description, b.Author, b.IsFree, pq.Array(b.Genres), id)
 
-	log.WithFields(log.Fields{
-		"repo": "UpdateBook",
-		"id":   id,
-	}).Info()
+	log.WithField("id", id).Info("Repository: UpdateBook")
 
 	return err
 }

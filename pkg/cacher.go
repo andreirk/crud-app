@@ -42,7 +42,7 @@ func (ch *CacheHandler) GetCachedBooks() ([]domain.Book, error) {
 			}
 		}
 
-		log.WithField("cacher", "GetCachedBooks").Info()
+		log.Info("Cacher: GetCachedBooks")
 		return books, nil
 	}
 
@@ -55,10 +55,7 @@ func (ch *CacheHandler) AddBook(book domain.Book) {
 	if item, _ := ch.cache.Get(bookID); item == nil {
 		ch.cache.Set(bookID, book, ttlDuration)
 		cachedBookIDs[bookID] = bookID
-		log.WithFields(log.Fields{
-			"cacher": "AddBook",
-			"id":     bookID,
-		}).Info()
+		log.WithField("id", book.ID).Info("Cacher: AddBook")
 	}
 }
 
@@ -75,10 +72,7 @@ func (ch CacheHandler) GetCachedBook(id int) (domain.Book, error) {
 
 	if val, err := ch.cache.Get(bookID); err == nil {
 		if book, ok := val.(domain.Book); ok {
-			log.WithFields(log.Fields{
-				"cacher": "GetCachedBook",
-				"id":     bookID,
-			}).Info()
+			log.WithField("id", id).Info("Cacher: GetCachedBook")
 			return book, nil
 		}
 	}
@@ -92,10 +86,7 @@ func (ch *CacheHandler) DeleteCachedBook(id int) {
 	if _, err := ch.cache.Get(bookId); err == nil {
 		ch.cache.Delete(bookId)
 		delete(cachedBookIDs, bookId)
-		log.WithFields(log.Fields{
-			"cacher": "DeleteCachedBook",
-			"id":     bookId,
-		}).Info()
+		log.WithField("id", id).Info("Cacher: DeleteCachedBook")
 	}
 }
 
@@ -108,10 +99,7 @@ func (ch *CacheHandler) UpdateCachedBook(id int, book domain.Book) {
 			book.PublishedAt = cachedBook.PublishedAt
 
 			ch.cache.Set(bookId, book, ttlDuration)
-			log.WithFields(log.Fields{
-				"cacher": "UpdateCachedBook",
-				"id":     bookId,
-			}).Info()
+			log.WithField("id", id).Info("Cacher: UpdateCachedBook")
 		}
 	}
 }
