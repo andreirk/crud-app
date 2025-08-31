@@ -9,6 +9,7 @@ import (
 	"github.com/jackietana/crud-app/internal/service"
 	"github.com/jackietana/crud-app/internal/transport/rest"
 	"github.com/jackietana/crud-app/pkg/database"
+	"github.com/jackietana/crud-app/pkg/hash"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -45,8 +46,11 @@ func main() {
 
 	//init dependencies
 	bookRepo := psql.NewBookRepo(db)
+	userRepo := psql.NewUserRepo(db)
+	hasher := hash.NewSHA1Hasher(cfg.Salt)
 	bookService := service.NewBookService(bookRepo)
-	bookHandler := rest.NewBookHandler(bookService)
+	userService := service.NewUserService(userRepo, hasher, cfg.Secret, cfg.Auth.TokenTTL)
+	bookHandler := rest.NewHandler(bookService, userService)
 
 	//init and run server
 	r := bookHandler.InitRouter()

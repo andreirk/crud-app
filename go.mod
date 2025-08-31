@@ -24,6 +24,7 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/jackietana/cache-example v0.0.0-20250813152802-1ab697a53854 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

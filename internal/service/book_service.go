@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackietana/crud-app/internal/domain"
-	"github.com/jackietana/crud-app/pkg"
+	"github.com/jackietana/crud-app/pkg/cache"
 )
 
 type BookRepository interface {
@@ -17,11 +17,11 @@ type BookRepository interface {
 
 type BookService struct {
 	repo   BookRepository
-	cacher *pkg.CacheHandler
+	cacher *cache.CacheHandler
 }
 
 func NewBookService(repo BookRepository) *BookService {
-	return &BookService{repo, pkg.NewCacheHandler()}
+	return &BookService{repo, cache.NewCacheHandler()}
 }
 
 func (bs *BookService) GetBooks(ctx context.Context) ([]domain.Book, error) {

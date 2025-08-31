@@ -1,4 +1,4 @@
-package pkg
+package cache
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ttlDuration = time.Hour * 8
+const cacheTTL = time.Hour * 8
 
 var (
 	allBooksCached bool
@@ -53,7 +53,7 @@ func (ch *CacheHandler) AddBook(book domain.Book) {
 	bookID := fmt.Sprintf("book_%d", book.ID)
 
 	if item, _ := ch.cache.Get(bookID); item == nil {
-		ch.cache.Set(bookID, book, ttlDuration)
+		ch.cache.Set(bookID, book, cacheTTL)
 		cachedBookIDs[bookID] = bookID
 		log.WithField("id", book.ID).Info("Cacher: AddBook")
 	}
@@ -98,7 +98,7 @@ func (ch *CacheHandler) UpdateCachedBook(id int, book domain.Book) {
 			book.ID = cachedBook.ID
 			book.PublishedAt = cachedBook.PublishedAt
 
-			ch.cache.Set(bookId, book, ttlDuration)
+			ch.cache.Set(bookId, book, cacheTTL)
 			log.WithField("id", id).Info("Cacher: UpdateCachedBook")
 		}
 	}
