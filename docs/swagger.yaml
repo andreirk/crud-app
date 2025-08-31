@@ -32,6 +32,44 @@ info:
   title: CRUD-app
   version: "1.0"
 paths:
+  /auth/sign-in:
+    get:
+      consumes:
+      - application/json
+      description: sign in method
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Sign In
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: sign up method
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully signed up
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+      summary: Sign Up
+      tags:
+      - auth
   /books:
     get:
       description: get all books
@@ -44,6 +82,8 @@ paths:
             items:
               $ref: '#/definitions/domain.Book'
             type: array
+      security:
+      - TokenAuth: []
       summary: List books
       tags:
       - books
@@ -58,6 +98,8 @@ paths:
           description: Book successfully created
           schema:
             type: string
+      security:
+      - TokenAuth: []
       summary: Create book
       tags:
       - books
@@ -81,6 +123,8 @@ paths:
           description: book not found
           schema:
             type: string
+      security:
+      - TokenAuth: []
       summary: Delete book
       tags:
       - books
@@ -103,6 +147,8 @@ paths:
           description: book not found
           schema:
             type: string
+      security:
+      - TokenAuth: []
       summary: Get specific book
       tags:
       - books
@@ -127,6 +173,8 @@ paths:
           description: book not found
           schema:
             type: string
+      security:
+      - TokenAuth: []
       summary: Update book
       tags:
       - books

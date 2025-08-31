@@ -14,9 +14,9 @@ import (
 // @Description sign up method
 // @Tags auth
 // @Accept json
-// @Produce string
+// @Produce plain
 // @Success 200 {string} string "Successfully signed up"
-// @Failure 400 {string}
+// @Failure 400
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var user domain.User
@@ -40,9 +40,9 @@ func (h *Handler) signUp(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Success 200 {json} json "{"token": token_string}"
-// @Failure 400 {string}
-// @Failure 500 {json} json "{"error": error_string}"
+// @Success 200 {string} string
+// @Failure 400
+// @Failure 500 {string} string
 // @Router /auth/sign-in [get]
 func (h *Handler) signIn(c *gin.Context) {
 	var user domain.UserSignIn
