@@ -26,7 +26,7 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	if err := h.UserService.SignUp(context.TODO(), user); err != nil {
+	if err := h.userService.SignUp(context.TODO(), user); err != nil {
 		log.WithField("handler", "signUp").Error(err)
 		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
 		return
@@ -52,7 +52,7 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.UserService.SignIn(context.TODO(), user)
+	accessToken, refreshToken, err := h.userService.SignIn(context.TODO(), user)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			log.WithField("handler", "signIn").Error("user not found")
@@ -67,7 +67,32 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("refresh-token", refreshToken, 180, "/auth", "localhost", false, true)
 	c.JSON(http.StatusOK, map[string]string{
-		"token": token,
+		"token": accessToken,
+	})
+}
+
+// TODO: add swagger
+func (h *Handler) refresh(c *gin.Context) {
+	cookie, err := c.Cookie("refresh-token")
+	if err != nil {
+		log.WithField("handler", "refresh").Error(err)
+		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.WithField("handler", "refresh").Infof("%s", cookie)
+
+	accessToken, refreshToken, err := h.userService.RefreshTokens(c.Request.Context(), cookie)
+	if err != nil {
+		log.WithField("handler", "refresh").Error(err)
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	c.SetCookie("refresh-token", refreshToken, 180, "/auth", "localhost", false, true)
+	c.JSON(http.StatusOK, map[string]string{
+		"token": accessToken,
 	})
 }

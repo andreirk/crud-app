@@ -47,9 +47,10 @@ func main() {
 	//init dependencies
 	bookRepo := psql.NewBookRepo(db)
 	userRepo := psql.NewUserRepo(db)
+	tokenRepo := psql.NewTokenRepo(db)
 	hasher := hash.NewSHA1Hasher(cfg.Salt)
 	bookService := service.NewBookService(bookRepo)
-	userService := service.NewUserService(userRepo, hasher, cfg.Secret, cfg.Auth.TokenTTL)
+	userService := service.NewUserService(userRepo, tokenRepo, hasher, cfg.Secret, cfg.Auth.TokenTTL, cfg.Auth.RefreshTTL)
 	bookHandler := rest.NewHandler(bookService, userService)
 
 	//init and run server

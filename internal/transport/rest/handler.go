@@ -21,13 +21,14 @@ type BookService interface {
 
 type UserService interface {
 	SignUp(ctx context.Context, user domain.User) error
-	SignIn(ctx context.Context, user domain.UserSignIn) (string, error)
-	ParseToken(ctx context.Context, token string) (int, error)
+	SignIn(ctx context.Context, user domain.UserSignIn) (string, string, error)
+	ParseToken(ctx context.Context, accessToken string) (int, error)
+	RefreshTokens(ctx context.Context, refreshToken string) (string, string, error)
 }
 
 type Handler struct {
 	bookService BookService
-	UserService UserService
+	userService UserService
 }
 
 func NewHandler(bookService BookService, userService UserService) *Handler {
@@ -42,6 +43,7 @@ func (h *Handler) InitRouter() *gin.Engine {
 		auth := r.Group("/auth")
 		auth.POST("/sign-up", h.signUp)
 		auth.GET("/sign-in", h.signIn)
+		auth.GET("/refresh", h.refresh)
 	}
 
 	{

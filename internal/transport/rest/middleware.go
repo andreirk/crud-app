@@ -34,7 +34,7 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userId, err := h.UserService.ParseToken(c.Request.Context(), token)
+		userId, err := h.userService.ParseToken(c.Request.Context(), token)
 		if err != nil {
 			log.WithField("middleware:", "authMiddleware").Error(err)
 			http.Error(c.Writer, err.Error(), http.StatusUnauthorized)

@@ -3,3 +3,4 @@ server:
 
 auth:
   token_ttl: 1m
+  refresh_ttl: 3m

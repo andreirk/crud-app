@@ -17,7 +17,8 @@ type Config struct {
 	} `mapstructure:"server"`
 
 	Auth struct {
-		TokenTTL time.Duration `mapstructure:"token_ttl"`
+		TokenTTL   time.Duration `mapstructure:"token_ttl"`
+		RefreshTTL time.Duration `mapstructure:"refresh_ttl"`
 	} `mapstructure:"auth"`
 }
 
@@ -53,23 +54,23 @@ func (c *Config) getField(field string) string {
 }
 
 func (c *Config) getSalt() error {
-	val, ok := viper.Get("hash_salt").(string)
-	if ok {
-		c.Salt = val
-		return nil
+	c.Salt = c.getField("hash_salt")
+
+	if c.Salt == "" {
+		return errors.New("unable to retrieve salt")
 	}
 
-	return errors.New("unable to retrieve salt")
+	return nil
 }
 
 func (c *Config) getSecret() error {
-	val, ok := viper.Get("jwt_secret").(string)
-	if ok {
-		c.Secret = []byte(val)
-		return nil
+	c.Salt = c.getField("jwt_secret")
+
+	if c.Salt == "" {
+		return errors.New("unable to retrieve secret")
 	}
 
-	return errors.New("unable to retrieve secret")
+	return nil
 }
 
 func New(dir, file string) (*Config, error) {

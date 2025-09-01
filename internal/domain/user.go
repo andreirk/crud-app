@@ -1,11 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrUserNotFound = errors.New("user not found")
 
 type UserSignIn struct {
 	Email    string `json:"email" validate:"required,email"`
