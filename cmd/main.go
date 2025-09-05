@@ -57,9 +57,9 @@ func main() {
 
 	bookService := service.NewBookService(bookRepo)
 	userService := service.NewUserService(userRepo, tokenRepo, hasher, loggerClient, cfg.Secret, cfg.Auth.TokenTTL, cfg.Auth.RefreshTTL)
-	bookHandler := rest.NewHandler(bookService, userService)
+	handler := rest.NewHandler(bookService, userService)
 
 	//init and run server
-	r := bookHandler.InitRouter()
+	r := handler.InitRouter()
 	log.Fatal(r.Run(fmt.Sprintf(":%d", cfg.Server.Port)))
 }
