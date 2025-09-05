@@ -11,6 +11,8 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/jackietana/crud-app/internal/domain"
+	logger "github.com/jackietana/grpc-logger/pkg/domain"
+	log "github.com/sirupsen/logrus"
 )
 
 type PasswordHasher interface {
@@ -27,10 +29,15 @@ type TokenRepository interface {
 	Get(ctx context.Context, token string) (domain.RefreshToken, error)
 }
 
+type LoggerClient interface {
+	SendLogRequest(ctx context.Context, req logger.LogItem) error
+}
+
 type UserService struct {
-	userRepo  UserRepository
-	tokenRepo TokenRepository
-	hasher    PasswordHasher
+	userRepo     UserRepository
+	tokenRepo    TokenRepository
+	hasher       PasswordHasher
+	loggerClient LoggerClient
 
 	hmacSecret []byte
 	tokenTTL   time.Duration
@@ -38,8 +45,8 @@ type UserService struct {
 }
 
 func NewUserService(userRepo UserRepository, tokenRepo TokenRepository, hasher PasswordHasher,
-	secret []byte, tokenTTL time.Duration, refreshTTL time.Duration) *UserService {
-	return &UserService{userRepo, tokenRepo, hasher, secret, tokenTTL, refreshTTL}
+	logger LoggerClient, secret []byte, tokenTTL time.Duration, refreshTTL time.Duration) *UserService {
+	return &UserService{userRepo, tokenRepo, hasher, logger, secret, tokenTTL, refreshTTL}
 }
 
 func (us *UserService) SignUp(ctx context.Context, input domain.User) error {
@@ -55,7 +62,25 @@ func (us *UserService) SignUp(ctx context.Context, input domain.User) error {
 		RegisteredAt: time.Now(),
 	}
 
-	return us.userRepo.CreateUser(ctx, user)
+	if err := us.userRepo.CreateUser(ctx, user); err != nil {
+		return err
+	}
+
+	user, err = us.userRepo.GetByCredentials(ctx, input.Email, password)
+	if err != nil {
+		return err
+	}
+
+	if err := us.loggerClient.SendLogRequest(ctx, logger.LogItem{
+		Action:    logger.ACTION_REGISTER,
+		Entity:    logger.ENTITY_USER,
+		EntityID:  int64(user.ID),
+		Timestamp: time.Now(),
+	}); err != nil {
+		log.WithField("service", "User.signUp").Error(err)
+	}
+
+	return nil
 }
 
 func (us *UserService) SignIn(ctx context.Context, input domain.UserSignIn) (string, string, error) {

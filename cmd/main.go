@@ -7,6 +7,7 @@ import (
 	"github.com/jackietana/crud-app/internal/config"
 	"github.com/jackietana/crud-app/internal/repository/psql"
 	"github.com/jackietana/crud-app/internal/service"
+	grpc_client "github.com/jackietana/crud-app/internal/transport/grpc"
 	"github.com/jackietana/crud-app/internal/transport/rest"
 	"github.com/jackietana/crud-app/pkg/database"
 	"github.com/jackietana/crud-app/pkg/hash"
@@ -49,8 +50,13 @@ func main() {
 	userRepo := psql.NewUserRepo(db)
 	tokenRepo := psql.NewTokenRepo(db)
 	hasher := hash.NewSHA1Hasher(cfg.Salt)
+	loggerClient, err := grpc_client.NewClient(9000)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	bookService := service.NewBookService(bookRepo)
-	userService := service.NewUserService(userRepo, tokenRepo, hasher, cfg.Secret, cfg.Auth.TokenTTL, cfg.Auth.RefreshTTL)
+	userService := service.NewUserService(userRepo, tokenRepo, hasher, loggerClient, cfg.Secret, cfg.Auth.TokenTTL, cfg.Auth.RefreshTTL)
 	bookHandler := rest.NewHandler(bookService, userService)
 
 	//init and run server
