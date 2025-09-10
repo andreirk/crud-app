@@ -1,9 +1,14 @@
 TODO:
 > add graceful shutdown
+> 
 > add health checks
+> 
 > add Docker and compose
+> 
 > add tests
+> 
 > separate domain and dto (json tegs)
+> 
 > add ci/cd
 
 
